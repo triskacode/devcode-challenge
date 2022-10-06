@@ -24,6 +24,7 @@ export class TransformHttpResponseInterceptor<T>
     return next.handle().pipe(
       map((data) => ({
         status_code: statusCode,
+        status: 'Success',
         message: 'Success',
         timestamp: new Date().toISOString(),
         data,
