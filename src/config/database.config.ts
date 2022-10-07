@@ -5,5 +5,5 @@ export default registerAs('database', () => ({
   port: process.env.MYSQL_PORT,
   user: process.env.MYSQL_USER,
   password: process.env.MYSQL_PASSWORD,
-  name: process.env.MYSQL_DBNAME,
+  dbname: process.env.MYSQL_DBNAME,
 }));

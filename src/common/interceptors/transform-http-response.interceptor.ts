@@ -19,14 +19,10 @@ export class TransformHttpResponseInterceptor<T>
     context: ExecutionContext,
     next: CallHandler,
   ): Observable<Response<T>> {
-    const statusCode = context.switchToHttp().getResponse().statusCode;
-
     return next.handle().pipe(
       map((data) => ({
-        status_code: statusCode,
         status: 'Success',
         message: 'Success',
-        timestamp: new Date().toISOString(),
         data,
       })),
     );

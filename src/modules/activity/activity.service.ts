@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { ActivityRepository } from './activity.repository';
 import { CreateActivityDto } from './dto/create-activity.dto';
 import { FilterGetActivityDto } from './dto/filter-get-activity.dto';
@@ -17,8 +17,6 @@ export class ActivityService {
 
       return await this.activitiesRepository.create(activity);
     } catch (err) {
-      Logger.error(err.message, 'ActivityService - create');
-
       throw err;
     }
   }
@@ -27,8 +25,6 @@ export class ActivityService {
     try {
       return await this.activitiesRepository.findBy(filter);
     } catch (err) {
-      Logger.error(err.message, 'ActivityService - findBy');
-
       throw err;
     }
   }
@@ -42,8 +38,6 @@ export class ActivityService {
 
       return activity;
     } catch (err) {
-      Logger.error(err.message, 'ActivityService - findById');
-
       throw err;
     }
   }
@@ -60,25 +54,19 @@ export class ActivityService {
         updateActivityDto,
       );
     } catch (err) {
-      Logger.error(err.message, 'ActivityService - update');
-
       throw err;
     }
   }
 
   async remove(id: number) {
     try {
-      const activity = await this.activitiesRepository.findById(id);
+      const deleteResult = await this.activitiesRepository.delete(id);
 
-      if (!activity)
+      if (!deleteResult)
         throw new NotFoundException(`Activity with ID ${id} Not Found`);
-
-      await this.activitiesRepository.delete(activity);
 
       return {};
     } catch (err) {
-      Logger.error(err.message, 'ActivityService - remove');
-
       throw err;
     }
   }

@@ -2,14 +2,14 @@ import {
   IsBoolean,
   IsEnum,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
 } from 'class-validator';
-import { IsValidActivityId } from 'src/modules/todo/validators/activity-id.validator';
 import { Priority } from '../todo.types';
 
 export class CreateTodoDto {
-  @IsValidActivityId()
+  @IsNumber()
   @IsNotEmpty({ message: 'activity_group_id cannot be null' })
   activity_group_id: number;
 

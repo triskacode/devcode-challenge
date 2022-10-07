@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { Activity } from './entities/activity.entity';
@@ -14,27 +14,45 @@ export class ActivityRepository {
     this.queryBuilder = repository.createQueryBuilder('activity');
   }
 
-  async create(entity: Activity) {
-    return await this.repository.save(entity);
+  async create(entity: Activity): Promise<Activity> {
+    const insertResult = await this.repository.insert(entity);
+
+    return { ...entity, ...insertResult.generatedMaps[0] };
   }
 
-  async update(entity: Activity, updateSet: Partial<Activity>) {
-    return await this.repository.save({ ...entity, ...updateSet });
+  async update(
+    entity: Activity,
+    updateSet: Partial<Activity>,
+  ): Promise<Activity> {
+    const updateResult = await this.repository.update(
+      { id: entity.id },
+      { ...entity, ...updateSet },
+    );
+
+    if (!updateResult.affected)
+      throw new InternalServerErrorException('Cannot update activities');
+
+    return { ...entity, ...updateSet };
   }
 
-  async delete(entity: Activity) {
-    return await this.repository.remove(entity);
+  async delete(id: Activity['id']): Promise<boolean> {
+    const deleteResult = await this.repository.delete({ id });
+
+    return !!deleteResult.affected;
   }
 
-  async findBy(where?: Partial<Activity>) {
-    const query = this.queryBuilder.where(where ?? {});
+  async findBy(where?: Partial<Activity>): Promise<Activity[]> {
+    const query = this.queryBuilder
+      .where(where ?? {})
+      .limit(10)
+      .cache(5000);
 
-    return query.getMany();
+    return await query.getMany();
   }
 
-  async findById(id: Activity['id']) {
+  async findById(id: Activity['id']): Promise<Activity> {
     const query = this.queryBuilder.where({ id });
 
-    return query.getOne();
+    return await query.getOne();
   }
 }

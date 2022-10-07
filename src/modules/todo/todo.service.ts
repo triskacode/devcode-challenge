@@ -1,4 +1,8 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { ActivityRepository } from 'src/modules/activity/activity.repository';
 import { CreateTodoDto } from './dto/create-todo.dto';
 import { FilterGetTodoDto } from './dto/filter-get-todo.dto';
@@ -19,14 +23,17 @@ export class TodoService {
         createTodoDto.activity_group_id,
       );
 
+      if (!activity)
+        throw new BadRequestException(
+          'activity_group_id must reference id on activity',
+        );
+
       const todo = new Todo();
       todo.title = createTodoDto.title;
       todo.activity = activity;
 
       return await this.todosRepository.create(todo);
     } catch (err) {
-      Logger.error(err.message, 'TodoService - create');
-
       throw err;
     }
   }
@@ -35,8 +42,6 @@ export class TodoService {
     try {
       return await this.todosRepository.findBy(filter);
     } catch (err) {
-      Logger.error(err.message, 'TodoService - findBy');
-
       throw err;
     }
   }
@@ -49,8 +54,6 @@ export class TodoService {
 
       return todo;
     } catch (err) {
-      Logger.error(err.message, 'TodoService - findById');
-
       throw err;
     }
   }
@@ -61,26 +64,34 @@ export class TodoService {
 
       if (!todo) throw new NotFoundException(`Todo with ID ${id} Not Found`);
 
+      if (updateTodoDto.activity_group_id) {
+        const activity = await this.activitiesRepository.findById(
+          updateTodoDto.activity_group_id,
+        );
+
+        if (!activity)
+          throw new BadRequestException(
+            'activity_group_id must reference id on activity',
+          );
+
+        todo.activity = activity;
+      }
+
       return await this.todosRepository.update(todo, updateTodoDto);
     } catch (err) {
-      Logger.error(err.message, 'TodoService - update');
-
       throw err;
     }
   }
 
   async remove(id: number) {
     try {
-      const todo = await this.todosRepository.findById(id);
+      const deleteResult = await this.todosRepository.delete(id);
 
-      if (!todo) throw new NotFoundException(`Todo with ID ${id} Not Found`);
-
-      await this.todosRepository.delete(todo);
+      if (!deleteResult)
+        throw new NotFoundException(`Todo with ID ${id} Not Found`);
 
       return {};
     } catch (err) {
-      Logger.error(err.message, 'TodoService - remove');
-
       throw err;
     }
   }

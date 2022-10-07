@@ -2,7 +2,9 @@ import { Activity } from 'src/modules/activity/entities/activity.entity';
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -10,7 +12,7 @@ import {
 } from 'typeorm';
 import { Priority } from '../todo.types';
 
-@Entity()
+@Entity({ name: 'todos' })
 export class Todo {
   @PrimaryGeneratedColumn()
   id: number;
@@ -30,6 +32,9 @@ export class Todo {
   @UpdateDateColumn()
   updated_at: Date;
 
+  @DeleteDateColumn()
+  deleted_at: Date;
+
   @ManyToOne(() => Activity, (entity: Activity) => entity.id, {
     onDelete: 'CASCADE',
   })
@@ -37,5 +42,6 @@ export class Todo {
   activity: Activity;
 
   @Column({ name: 'activity_group_id' })
+  @Index()
   activity_group_id: Activity['id'];
 }
