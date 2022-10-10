@@ -7,15 +7,13 @@ import {
   HttpStatus,
   NotFoundException,
 } from '@nestjs/common';
-import { HttpAdapterHost } from '@nestjs/core';
+import { Response } from 'express';
 
 @Catch(HttpException)
 export class HttpExceptionFilter<T extends Error> implements ExceptionFilter {
-  constructor(private readonly httpAdapterHost: HttpAdapterHost) {}
-
   catch(exception: T, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
-    const { httpAdapter } = this.httpAdapterHost;
+    const response = ctx.getResponse<Response>();
 
     let status: string;
     let message: string;
@@ -37,18 +35,16 @@ export class HttpExceptionFilter<T extends Error> implements ExceptionFilter {
             : 'Whoops, something went wrong';
     }
 
-    const responseBody = {
-      status,
-      message,
-      data: {},
-    };
-
-    httpAdapter.reply(
-      ctx.getResponse(),
-      responseBody,
-      exception instanceof HttpException
-        ? exception.getStatus()
-        : HttpStatus.INTERNAL_SERVER_ERROR,
-    );
+    response
+      .status(
+        exception instanceof HttpException
+          ? exception.getStatus()
+          : HttpStatus.INTERNAL_SERVER_ERROR,
+      )
+      .json({
+        status,
+        message,
+        data: {},
+      });
   }
 }

@@ -7,6 +7,8 @@ import {
   Param,
   Delete,
   Query,
+  UseInterceptors,
+  CacheInterceptor,
 } from '@nestjs/common';
 import { ActivityService } from './activity.service';
 import { CreateActivityDto } from './dto/create-activity.dto';
@@ -14,6 +16,7 @@ import { FilterGetActivityDto } from './dto/filter-get-activity.dto';
 import { UpdateActivityDto } from './dto/update-activity.dto';
 
 @Controller('activity-groups')
+@UseInterceptors(CacheInterceptor)
 export class ActivityController {
   constructor(private readonly activityService: ActivityService) {}
 

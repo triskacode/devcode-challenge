@@ -1,4 +1,4 @@
-import { CacheInterceptor, CacheModule, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
@@ -6,7 +6,6 @@ import { ActivityModule } from './modules/activity/activity.module';
 import { TodoModule } from './modules/todo/todo.module';
 import DatabaseConfig from './config/database.config';
 import AppConfig from './config/app.config';
-import { APP_INTERCEPTOR } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -27,16 +26,9 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
         autoLoadEntities: true,
       }),
     }),
-    CacheModule.register(),
     ActivityModule,
     TodoModule,
   ],
   controllers: [AppController],
-  providers: [
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: CacheInterceptor,
-    },
-  ],
 })
 export class AppModule {}
